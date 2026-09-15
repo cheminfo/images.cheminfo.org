@@ -1,0 +1,358 @@
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
+#root {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+.app-main {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.page {
+  width: 100%;
+  max-width: var(--page-max);
+  box-sizing: border-box;
+  padding: 1.5rem 1.25rem 3rem;
+  margin: 0 auto;
+}
+
+.page-lead {
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+}
+
+/* The filled part of a slider is the accent, like every interactive surface. */
+.bp6-slider-progress.bp6-intent-primary {
+  background-color: var(--accent);
+}
+
+/* One compact layout, in the editor's panel and in the Auto card alike. */
+.output-form .bp6-form-group {
+  margin-bottom: 1rem;
+}
+
+.output-form .bp6-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.output-form .bp6-label {
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+}
+
+.output-form .bp6-form-helper-text {
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* The unit sits on the field's line, in the field's type. */
+.size-row {
+  display: flex;
+  align-items: center;
+  font-size: var(--bp-typography-size-body-medium);
+  gap: 0.4rem;
+}
+
+.size-row .bp6-html-select {
+  min-width: 0;
+  flex: 1;
+}
+
+/* The editor: tools | image | panels | activity bar, under the bar. */
+.editor {
+  display: flex;
+  height: calc(100vh - var(--header-height));
+  background: var(--surface);
+}
+
+.editor-empty {
+  display: flex;
+  height: calc(100vh - var(--header-height));
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.editor-empty > div:last-child {
+  flex: 1;
+}
+
+.editor__toolbar {
+  display: flex;
+  border-right: 1px solid var(--border);
+}
+
+.editor__main {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex: 1 1 0%;
+  flex-direction: column;
+}
+
+.status-bar {
+  overflow: hidden;
+  padding: 0.25rem 0.75rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.panel-stack {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.panel {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 1px;
+  flex-direction: column;
+}
+
+.panel__toolbar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel__body {
+  display: flex;
+  overflow: auto;
+  min-height: 0;
+  flex: 1 1 1px;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  gap: 0.25rem;
+}
+
+.image-list {
+  overflow: auto;
+  min-height: 0;
+  flex: 1 1 1px;
+  margin: 0;
+  list-style: none;
+  padding-inline: 0;
+}
+
+.image-list__item {
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.image-list__item:hover {
+  background: var(--surface-sunken);
+}
+
+.image-list__item--active,
+.image-list__item--active:hover {
+  background: color-mix(in oklab, var(--accent) 12%, white);
+}
+
+.image-list__name {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-list__meta {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  background: var(--surface-sunken);
+}
+
+.preview__stage {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.preview__viewer,
+.preview__crop {
+  width: 100%;
+  height: 100%;
+}
+
+.preview__rotate {
+  width: min(28rem, 100%);
+}
+
+.preview__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  gap: 0.5rem;
+}
+
+.slider-row {
+  padding: 0 0.6rem 0.2rem;
+}
+
+.slider-row__label {
+  display: flex;
+  justify-content: space-between;
+  margin-left: -0.6rem;
+  cursor: default;
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.output-facts {
+  display: grid;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+  gap: 0.15rem 0.75rem;
+  grid-template-columns: auto 1fr;
+}
+
+.output-facts dt {
+  color: var(--text-muted);
+}
+
+.output-facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Settings beside the drop zone they apply to; stacked on a narrow screen. */
+.auto-layout {
+  display: grid;
+  margin: 1rem 0;
+  gap: 1.25rem;
+  grid-template-columns: minmax(18rem, 22rem) 1fr;
+}
+
+@media (width <= 48rem) {
+  .auto-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.auto-settings {
+  padding: 1rem 1.25rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.auto-settings__title {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+}
+
+.auto-drop {
+  min-height: 16rem;
+}
+
+.auto-results {
+  width: 100%;
+  margin-top: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.auto-results td {
+  vertical-align: middle;
+}
+
+.image-facts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0 0.75rem;
+}
+
+.image-facts__bytes {
+  color: var(--text-muted);
+}
+
+.shrink {
+  display: flex;
+  min-width: 12rem;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.shrink__track {
+  overflow: hidden;
+  height: 0.5rem;
+  flex: 1;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.shrink__fill {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+
+.shrink--larger .shrink__fill {
+  background: var(--brand-alt);
+}
+
+.shrink__label {
+  min-width: 6.5rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.shrink--larger .shrink__label {
+  color: var(--brand-alt-text);
+}
+
+.about h1 {
+  margin: 0.5rem 0;
+}
+
+.about h2 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.about__hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.about__hero .wordmark {
+  font-size: 1.6rem;
+  font-weight: 700;
+}

@@ -1,0 +1,65 @@
+# Cloudflare Tunnel deployment — no port published on the host.
+#
+# Cloudflare dashboard (https://dash.cloudflare.com):
+#   Networks → Tunnels → Create a tunnel → Cloudflared connector →
+#   copy the token into .env as TUNNEL_TOKEN=... → open the tunnel →
+#   Published applications → Add an application with
+#   Service = HTTP and URL = images:80.
+#
+# Select with COMPOSE_FILE=compose.cloudflared.yaml in .env, then:
+#   docker compose up -d
+
+services:
+  images:
+    # Use the released image by default. To build locally instead, run:
+    #   docker compose up -d --build
+    image: ${IMAGE_NAME:-ghcr.io/cheminfo/images.cheminfo.org}:${IMAGE_TAG:-latest}
+    build: .
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      # The analytics snippet of this deployment, injected into every page by
+      # the entrypoint. Unset means nothing is loaded and nothing is counted.
+      TRACKING_SCRIPT: ${TRACKING_SCRIPT:-}
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+      - /public:rw,noexec,nosuid,size=32m
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 256
+    ulimits:
+      core: 0
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    init: true
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 128m
+    cpus: 1
+    pids_limit: 64
+    ulimits:
+      core: 0
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '2'
+    depends_on:
+      - images

@@ -1,0 +1,52 @@
+# Traefik deployment — no port published on the host.
+#
+# Requires an external Docker network named `traefik` hosting the reverse
+# proxy, with a `websecure` entrypoint and a `letsencrypt` cert resolver.
+#
+# Select with COMPOSE_FILE=compose.traefik.yaml in .env, then:
+#   docker compose up -d
+
+services:
+  images:
+    # Use the released image by default. To build locally instead, run:
+    #   docker compose up -d --build
+    image: ${IMAGE_NAME:-ghcr.io/cheminfo/images.cheminfo.org}:${IMAGE_TAG:-latest}
+    build: .
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      # The analytics snippet of this deployment, injected into every page by
+      # the entrypoint. Unset means nothing is loaded and nothing is counted.
+      TRACKING_SCRIPT: ${TRACKING_SCRIPT:-}
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+      - /public:rw,noexec,nosuid,size=32m
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 256
+    ulimits:
+      core: 0
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    networks:
+      - traefik
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.images.rule=Host(`images.cheminfo.org`)'
+      - 'traefik.http.routers.images.entrypoints=websecure'
+      - 'traefik.http.routers.images.tls.certresolver=letsencrypt'
+      - 'traefik.http.services.images.loadbalancer.server.port=80'
+
+networks:
+  traefik:
+    external: true

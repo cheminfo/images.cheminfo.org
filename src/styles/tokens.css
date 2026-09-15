@@ -1,0 +1,9 @@
+/* tokens-ok: file — this site is not in ECOSYSTEM_SITES, so SiteTheme cannot
+   write its pair: fuchsia leads, amber answers (the sun of the mark). */
+:root {
+  --brand: #a21caf;
+  --brand-alt: #f59e0b;
+  /* The amber is 2.1:1 on white; this one is 5.0:1, for text. */
+  --brand-alt-text: #b45309;
+  --accent: var(--brand);
+}

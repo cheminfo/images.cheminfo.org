@@ -1,0 +1,6 @@
+CHANGELOG.md
+coverage
+dist
+node_modules
+playwright-report
+test-results

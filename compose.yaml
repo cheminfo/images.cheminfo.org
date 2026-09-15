@@ -1,0 +1,39 @@
+# Port-published deployment — publishes PORT on the host (the default mode).
+#
+# Used when COMPOSE_FILE is unset in .env. Run: docker compose up -d
+
+services:
+  images:
+    # Use the released image by default. To build locally instead, run:
+    #   docker compose up -d --build
+    image: ${IMAGE_NAME:-ghcr.io/cheminfo/images.cheminfo.org}:${IMAGE_TAG:-latest}
+    build: .
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      # The analytics snippet of this deployment, injected into every page by
+      # the entrypoint. Unset means nothing is loaded and nothing is counted.
+      TRACKING_SCRIPT: ${TRACKING_SCRIPT:-}
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+      # Where the pages are served from once the entrypoint has written the
+      # analytics snippet into them; the root filesystem stays read-only.
+      - /public:rw,noexec,nosuid,size=32m
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 256
+    ulimits:
+      core: 0
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '10m'
+        max-file: '3'
+    ports:
+      - '127.0.0.1:${PORT:-10915}:80'
