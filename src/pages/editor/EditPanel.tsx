@@ -7,6 +7,8 @@ import type { ColorSettings } from '../../imaging/settings.ts';
 import { NEUTRAL_COLOR } from '../../imaging/settings.ts';
 import { editOf, state, updateEdit } from '../../state/index.ts';
 
+import { RotateSlider } from './RotateSlider.tsx';
+
 const COLOR_SLIDERS: Array<{
   key: keyof ColorSettings;
   label: string;
@@ -66,18 +68,7 @@ export function EditPanel(props: { id: string }): ReactElement {
         </Toolbar>
       </div>
       <div className="panel__body">
-        <SliderRow
-          label="Rotate"
-          unit="°"
-          min={-180}
-          max={180}
-          step={0.5}
-          neutral={0}
-          value={edit.straighten}
-          onChange={(straighten) => {
-            updateEdit(id, { straighten });
-          }}
-        />
+        <RotateSlider id={id} />
         {COLOR_SLIDERS.map((slider) => (
           <SliderRow
             key={slider.key}

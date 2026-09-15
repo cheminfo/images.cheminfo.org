@@ -102,6 +102,49 @@ test('the preview is centred, zooms with the wheel, and dims outside the crop', 
   );
 });
 
+test('dragging the rotation turns the drawn crop frame, and draws it once let go', async ({
+  page,
+}) => {
+  const png = await screenshotPng(page);
+  await page.goto('/');
+  await page
+    .getByTestId('editor-drop')
+    .locator('input[type="file"]')
+    .setInputFiles([{ name: 'shot.png', mimeType: 'image/png', buffer: png }]);
+  await page.getByRole('button', { name: 'Crop' }).click();
+  const target = page.locator('.preview__crop img');
+  await expect(target).toBeVisible();
+  const before = await target.getAttribute('src');
+
+  const rotate = page.locator('.preview__rotate');
+  const handle = await rotate.locator('.bp6-slider-handle').boundingBox();
+  if (!handle) throw new Error('the rotation slider is not laid out');
+  await page.mouse.move(
+    handle.x + handle.width / 2,
+    handle.y + handle.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(handle.x + handle.width / 2 + 40, handle.y, {
+    steps: 5,
+  });
+
+  const turned = page.getByTestId('turned-preview');
+  await expect(turned).toBeVisible();
+  await expect(turned.locator('img')).toHaveAttribute('src', before ?? '');
+  await expect(turned.locator('img')).toHaveAttribute(
+    'style',
+    /rotate\((?!0deg)[\d.]+deg\)/,
+  );
+  const label = await rotate.locator('.slider-row__label').textContent();
+  expect(label).not.toBe('Rotate0°');
+
+  await page.mouse.up();
+  await expect(turned).toBeHidden();
+  await expect(target).toBeVisible();
+  await expect(target).not.toHaveAttribute('src', before ?? '');
+  await expect(rotate.locator('.slider-row__label')).toHaveText(label ?? '');
+});
+
 test('auto mode downloads the resized image straight away', async ({
   page,
 }) => {
@@ -117,6 +160,7 @@ test('auto mode downloads the resized image straight away', async ({
     .setInputFiles([{ name: 'shot.png', mimeType: 'image/png', buffer: png }]);
   expect((await download).suggestedFilename()).toBe('shot.jpg');
   const results = page.getByTestId('auto-results');
+  await expect(results).toContainText('1280 × 720 px');
   await expect(results).toContainText('400 × 225 px');
   await expect(results).toContainText(/\d+ % smaller/);
 });

@@ -11,6 +11,11 @@ interface SliderRowProps {
   neutral: number;
   unit?: string;
   onChange: (value: number) => void;
+  /**
+   * Called when the slider is let go, and after a reset.
+   * @default undefined — nothing is called
+   */
+  onRelease?: (value: number) => void;
 }
 
 /**
@@ -19,7 +24,17 @@ interface SliderRowProps {
  * @returns The row.
  */
 export function SliderRow(props: SliderRowProps): ReactElement {
-  const { label, value, min, max, step, neutral, unit = '', onChange } = props;
+  const {
+    label,
+    value,
+    min,
+    max,
+    step,
+    neutral,
+    unit = '',
+    onChange,
+    onRelease,
+  } = props;
   return (
     <div className="slider-row">
       <div
@@ -27,6 +42,7 @@ export function SliderRow(props: SliderRowProps): ReactElement {
         title="Double-click to reset"
         onDoubleClick={() => {
           onChange(neutral);
+          onRelease?.(neutral);
         }}
       >
         <span>{label}</span>
@@ -42,6 +58,7 @@ export function SliderRow(props: SliderRowProps): ReactElement {
         value={value}
         labelRenderer={false}
         onChange={onChange}
+        onRelease={onRelease}
       />
     </div>
   );

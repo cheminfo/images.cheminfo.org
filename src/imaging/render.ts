@@ -64,6 +64,8 @@ export async function renderImage(
     request.resize,
   );
   const canvas = await drawPlan(source, request, plan);
+  // A closed bitmap reports 0 × 0, so the size is read before closing it.
+  const { width: sourceWidth, height: sourceHeight } = source;
   if (request.cacheKey === undefined) source.close();
 
   const blob = await canvas.convertToBlob({
@@ -74,8 +76,8 @@ export async function renderImage(
     blob,
     width: plan.output.width,
     height: plan.output.height,
-    sourceWidth: source.width,
-    sourceHeight: source.height,
+    sourceWidth,
+    sourceHeight,
   };
   if (request.withReference) {
     result.reference = await canvas.convertToBlob({ type: 'image/png' });

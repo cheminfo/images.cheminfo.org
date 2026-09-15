@@ -17,7 +17,11 @@ import {
   toPixelsIn,
   toRelativeIn,
 } from '../../imaging/crop.ts';
+import type { Size } from '../../imaging/geometry.ts';
+import type { TurnedView } from '../../imaging/turn.ts';
 import { state, updateEdit } from '../../state/index.ts';
+
+import { PreviewStage } from './PreviewStage.tsx';
 
 const CROP_ID = 'crop';
 const ASPECTS = ['Free', 'Original', '1:1', '4:3', '3:2', '16:9', '3:4'];
@@ -28,6 +32,10 @@ const OUTSIDE_OPACITY = 0.55;
 interface CropStageProps {
   /** The whole rotated image. */
   url: string;
+  /** Size of that image. */
+  drawn: Size;
+  /** How that image is turned while a rotation is dragged, `null` otherwise. */
+  turned: TurnedView | null;
   /** Where a crop may go, in pixels of that image. */
   area: PixelRect;
   imageId: string;
@@ -40,7 +48,7 @@ interface CropStageProps {
  * @returns The crop stage.
  */
 export function CropStage(props: CropStageProps): ReactElement {
-  const { url, area, imageId } = props;
+  const { url, drawn, turned, area, imageId } = props;
   const initial = toPixelsIn(
     state.data.edits.peek()[imageId]?.crop ?? null,
     area,
@@ -63,7 +71,7 @@ export function CropStage(props: CropStageProps): ReactElement {
       }}
     >
       <CropToolbar area={area} imageId={imageId} />
-      <div className="preview__stage">
+      <PreviewStage url={url} drawn={drawn} turned={turned}>
         <RoiContainer
           className="preview__crop"
           target={<TargetImage src={url} />}
@@ -76,7 +84,7 @@ export function CropStage(props: CropStageProps): ReactElement {
             getOverlayOpacity={() => OUTSIDE_OPACITY}
           />
         </RoiContainer>
-      </div>
+      </PreviewStage>
     </RoiProvider>
   );
 }

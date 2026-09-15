@@ -1,18 +1,21 @@
 import { Spinner } from '@blueprintjs/core';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { ReactElement } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RoiContainer, RoiProvider, TargetImage } from 'react-roi';
 
-import { SliderRow } from '../../components/SliderRow.tsx';
 import type { PixelRect } from '../../imaging/crop.ts';
+import type { Size } from '../../imaging/geometry.ts';
 import { frameLayout } from '../../imaging/geometry.ts';
 import type { ImageEntry } from '../../imaging/readFiles.ts';
 import { previewChannel } from '../../imaging/renderPool.ts';
 import type { EditSettings } from '../../imaging/settings.ts';
-import { editOf, state, updateEdit } from '../../state/index.ts';
+import { turnedView } from '../../imaging/turn.ts';
+import { editOf, state } from '../../state/index.ts';
 
 import { CropStage } from './CropStage.tsx';
+import { PreviewStage } from './PreviewStage.tsx';
+import { RotateSlider } from './RotateSlider.tsx';
 
 const PREVIEW_RESIZE = { mode: 'longEdge', value: 2048 } as const;
 
@@ -21,6 +24,10 @@ interface PreviewImage {
   url: string;
   width: number;
   height: number;
+  /** The edits this image was drawn with. */
+  edit: EditSettings;
+  /** Size of the decoded source. */
+  source: Size;
   /** The frame this image was drawn on: the crop stage is re-seeded when it changes. */
   frame: string;
   /** Where a crop may go, in pixels of this image. */
@@ -39,14 +46,15 @@ export function Preview(props: { image: ImageEntry }): ReactElement {
   const { image } = props;
   const cropping = state.view.cropping.value;
   const edit = editOf(image.id);
+  const angle = state.view.straightening.value ?? edit.straighten;
 
   // While cropping, a change of the crop alone must not redraw the frame.
   const shownKey = JSON.stringify(cropping ? { ...edit, crop: null } : edit);
-  const shown = useMemo(() => JSON.parse(shownKey) as EditSettings, [shownKey]);
   const [preview, setPreview] = useState<PreviewImage | null>(null);
   const expectedKey = `${image.id}:${String(cropping)}`;
 
   useEffect(() => {
+    const shown = JSON.parse(shownKey) as EditSettings;
     let cancelled = false;
     void image
       .read()
@@ -64,16 +72,19 @@ export function Preview(props: { image: ImageEntry }): ReactElement {
       )
       .then((result) => {
         if (cancelled) return;
-        const { bounds, inner } = frameLayout(
-          { width: result.sourceWidth, height: result.sourceHeight },
-          shown,
-        );
+        const source = {
+          width: result.sourceWidth,
+          height: result.sourceHeight,
+        };
+        const { bounds, inner } = frameLayout(source, shown);
         const factor = result.width / bounds.width;
         setPreview({
           key: `${image.id}:${String(cropping)}`,
           url: URL.createObjectURL(result.blob),
           width: result.width,
           height: result.height,
+          edit: shown,
+          source,
           frame: frameKey(image.id, shown),
           area: {
             x: inner.x * factor,
@@ -89,7 +100,7 @@ export function Preview(props: { image: ImageEntry }): ReactElement {
     return () => {
       cancelled = true;
     };
-  }, [image, shown, cropping]);
+  }, [image, shownKey, cropping]);
 
   // The object URL of a preview lives until the next one replaces it.
   const url = preview?.url ?? '';
@@ -107,23 +118,37 @@ export function Preview(props: { image: ImageEntry }): ReactElement {
         <Spinner />
       </div>
     );
-  } else if (cropping) {
-    stage = (
+  } else {
+    const drawn = { width: preview.width, height: preview.height };
+    const turned =
+      angle === preview.edit.straighten
+        ? null
+        : turnedView({
+            source: preview.source,
+            drawnEdit: preview.edit,
+            drawn,
+            angle,
+            fullFrame: cropping,
+            crop: edit.crop,
+          });
+    stage = cropping ? (
       <CropStage
         key={preview.frame}
         url={preview.url}
+        drawn={drawn}
+        turned={turned}
         area={preview.area}
         imageId={image.id}
       />
-    );
-  } else {
-    // react-roi fits the image once: a new size needs a new stage.
-    stage = (
-      <ViewStage
-        key={`${image.id}:${preview.width}x${preview.height}`}
-        url={preview.url}
-        alt={image.name}
-      />
+    ) : (
+      <PreviewStage url={preview.url} drawn={drawn} turned={turned}>
+        {/* react-roi fits the image once: a new size needs a new stage. */}
+        <ViewStage
+          key={`${image.id}:${preview.width}x${preview.height}`}
+          url={preview.url}
+          alt={image.name}
+        />
+      </PreviewStage>
     );
   }
 
@@ -133,18 +158,7 @@ export function Preview(props: { image: ImageEntry }): ReactElement {
       {cropping ? (
         <div className="preview__toolbar">
           <div className="preview__rotate">
-            <SliderRow
-              label="Rotate"
-              unit="°"
-              min={-180}
-              max={180}
-              step={0.5}
-              neutral={0}
-              value={edit.straighten}
-              onChange={(straighten) => {
-                updateEdit(image.id, { straighten });
-              }}
-            />
+            <RotateSlider id={image.id} />
           </div>
         </div>
       ) : null}
@@ -155,17 +169,13 @@ export function Preview(props: { image: ImageEntry }): ReactElement {
 function ViewStage(props: { url: string; alt: string }): ReactElement {
   const { url, alt } = props;
   return (
-    <div className="preview__stage">
-      <RoiProvider initialConfig={{ mode: 'select' }}>
-        <RoiContainer
-          className="preview__viewer"
-          target={
-            <TargetImage src={url} alt={alt} data-testid="preview-image" />
-          }
-          zoomWithoutModifierKey
-        />
-      </RoiProvider>
-    </div>
+    <RoiProvider initialConfig={{ mode: 'select' }}>
+      <RoiContainer
+        className="preview__viewer"
+        target={<TargetImage src={url} alt={alt} data-testid="preview-image" />}
+        zoomWithoutModifierKey
+      />
+    </RoiProvider>
   );
 }
 
