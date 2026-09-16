@@ -10,6 +10,11 @@ import { IMAGES_SITE } from './src/site.ts';
 const port = Number(process.env.PORT ?? 10_915);
 
 export default defineConfig({
+  // The build carries no mount path. Every asset is written relative, so the
+  // one `dist` serves this site's own host and a path of a shared one without
+  // being rebuilt: the `<base>` the page carries is what resolves them, and the
+  // router reads its mount back off that.
+  base: './',
   plugins: [
     react(),
     cheminfoPrerender({
@@ -17,6 +22,12 @@ export default defineConfig({
       routes: PAGE_ROUTES,
       category: 'MultimediaApplication',
       operatingSystem: 'Any modern browser',
+      noscript: {
+        // The build bakes in no mount, so the crawl path is written against the
+        // `<base>` the page carries rather than the root of a host this
+        // deployment may only share.
+        hrefs: 'relative',
+      },
     }),
   ],
   worker: { format: 'es' },

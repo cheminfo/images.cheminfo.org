@@ -15,6 +15,7 @@ import type { Tab } from './router.ts';
 import { router } from './router.ts';
 import { PAGE_ROUTES } from './seo/routes.ts';
 import { IMAGES_SITE } from './site.ts';
+import { pathWithoutBase, withBase } from './state/site.ts';
 
 const PAGES: Array<{ tab: Tab; label: string; title: string }> = [
   { tab: 'edit', label: 'Edit', title: 'Crop, rotate and adjust images' },
@@ -33,7 +34,9 @@ export function App(): ReactElement {
       pageDocumentMeta({
         site: IMAGES_SITE,
         routes: PAGE_ROUTES,
-        url: router.format({ tab }),
+        // The route table is written from the site's own root, so the mount
+        // comes back off before it is read.
+        url: pathWithoutBase(router.format({ tab })),
       }),
     );
   }, [tab]);
@@ -43,7 +46,7 @@ export function App(): ReactElement {
       <header className="app-header">
         <div className="app-header__inner app-header__inner--full">
           <a
-            href="/"
+            href={withBase('/')}
             className="brand"
             title={IMAGES_SITE.host}
             onClick={(event) => {
