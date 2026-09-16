@@ -28,7 +28,7 @@
     "fifo-logger": "^2.0.1",
     "file-collection": "^6.7.0",
     "react": "^19.3.0",
-    "react-cheminfo": "^0.14.0",
+    "react-cheminfo": "^0.15.0",
     "react-dom": "^19.3.0",
     "react-roi": "^3.2.1",
     "react-science": "^23.1.1"

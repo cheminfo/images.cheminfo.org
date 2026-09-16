@@ -1,8 +1,9 @@
 import { Dialog, DialogBody } from '@blueprintjs/core';
 import type { ReactElement } from 'react';
+import { AboutPage } from 'react-cheminfo/ui';
 
+import { ABOUT } from '../../about.ts';
 import { BrandMark } from '../../components/Brand.tsx';
-import { AboutContent } from '../About.tsx';
 
 /**
  * The About, opened from the editor toolbar without leaving the images.
@@ -25,7 +26,7 @@ export function AboutDialog(props: {
       style={{ width: 640 }}
     >
       <DialogBody data-testid="about-dialog">
-        <AboutContent />
+        <AboutPage content={ABOUT} mark={<BrandMark size={56} />} />
       </DialogBody>
     </Dialog>
   );
