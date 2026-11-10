@@ -1,6 +1,6 @@
 {
   "name": "images-cheminfo-org",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Drop images or folders, crop, rotate, adjust colours, resize and compress them to JPEG or PNG, in the browser.",
   "type": "module",
   "private": true,
