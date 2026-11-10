@@ -16,6 +16,22 @@ services:
     image: ${IMAGE_NAME:-ghcr.io/cheminfo/images.cheminfo.org}:${IMAGE_TAG:-latest}
     build: .
     init: true
+    # Nothing is bind-mounted, so nothing here needs root.
+    user: '65534:65534'
+    # What the server's deploy script probes before it keeps a new container.
+    healthcheck:
+      # The image ships no wget or curl, so bash asks for /health itself.
+      test:
+        [
+          'CMD',
+          'bash',
+          '-c',
+          'exec 3<>/dev/tcp/127.0.0.1/80 && printf "GET /health HTTP/1.0\r\n\r\n" >&3 && head -n1 <&3 | grep -q " 200 "',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
     stop_grace_period: 30s
     read_only: true
