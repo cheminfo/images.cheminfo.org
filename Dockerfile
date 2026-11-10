@@ -1,11 +1,11 @@
-FROM node:24-alpine AS builder
+FROM node:24-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --ignore-scripts
 COPY . .
 RUN npm run build
 
-FROM joseluisq/static-web-server:2-alpine
+FROM joseluisq/static-web-server:2-debian
 # The build is served as it was written; the entrypoint copies it to /public
 # only when it has an analytics snippet to inject into every page.
 COPY --from=builder /app/dist /public-src
